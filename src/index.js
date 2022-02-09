@@ -65,12 +65,24 @@ server.post("/login", (req, res) => {
 server.post("/sign-up", (req, res) => {
 	const email = req.body.email;
 	const password = req.body.password;
-	const query = db.prepare("INSERT INTO users (email,password) VALUES (?,?)");
-	const userInsert = query.run(email, password);
-	res.json({
-		success: true,
-		userId: userInsert.lastInsertRowid,
-	});
+
+	const query1 = db.prepare(`SELECT email FROM users WHERE email = ? `);
+	const existingEmail = query1.get(email);
+	console.log(existingEmail);
+
+	if (existingEmail !== undefined) {
+		res.json({
+			success: false,
+			errorMessage: "Usuaria ya existente",
+		});
+	} else {
+		const query = db.prepare("INSERT INTO users (email,password) VALUES (?,?)");
+		const userInsert = query.run(email, password);
+		res.json({
+			success: true,
+			userId: userInsert.lastInsertRowid,
+		});
+	}
 });
 
 const staticServerPath = "./src/public-react";
