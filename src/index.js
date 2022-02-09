@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const movies = require("./data/movies.json");
 const Database = require("better-sqlite3");
 
 // create and config server
@@ -49,16 +48,20 @@ server.get("/movies", (req, res) => {
 });
 
 server.post("/login", (req, res) => {
-	if (req.body.email.includes("gmail")) {
+	const emailFromWeb = req.body.email;
+	const passwordFromWeb = req.body.password;
+	const query1 = db.prepare(`SELECT * FROM users WHERE email = ? AND password = ?`);
+	const existingEmail = query1.get(emailFromWeb,passwordFromWeb);
+	if( emailFromWeb === existingEmail.email &&  passwordFromWeb === existingEmail.password){
 		res.json({
-			success: true,
-			userId: "123",
-		});
-	} else {
+			success:true,
+            userId:existingEmail.id
+		})
+	}else{
 		res.json({
-			success: false,
-			errorMessage: "Usuario no encontrado",
-		});
+			success:false,
+			errorMessage:'usuario no encontrado'
+		})
 	}
 });
 
